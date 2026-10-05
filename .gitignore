@@ -1,0 +1,15 @@
+node_modules/
+dist/
+coverage/
+.angular/
+target/
+build/
+.gradle/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log

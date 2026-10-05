@@ -21,8 +21,14 @@ module.exports = tseslint.config(
       parserOptions: { projectService: true, tsconfigRootDir: __dirname },
     },
     rules: {
-      '@angular-eslint/component-selector': ['error', { type: 'element', prefix: 'app', style: 'kebab-case' }],
-      '@angular-eslint/directive-selector': ['error', { type: 'attribute', prefix: 'app', style: 'camelCase' }],
+      '@angular-eslint/component-selector': [
+        'error',
+        { type: 'element', prefix: 'app', style: 'kebab-case' },
+      ],
+      '@angular-eslint/directive-selector': [
+        'error',
+        { type: 'attribute', prefix: 'app', style: 'camelCase' },
+      ],
       '@angular-eslint/prefer-on-push-component-change-detection': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
@@ -38,9 +44,18 @@ module.exports = tseslint.config(
         'error',
         {
           patterns: [
-            { group: ['@features/*/*'], message: 'Import a feature only through its public API (index.ts).' },
+            {
+              group: ['@features/*/*'],
+              message: 'Import a feature only through its public API (index.ts).',
+            },
             ...(restrictedThirdParty.length > 0
-              ? [{ group: restrictedThirdParty, message: 'Third-party libraries are only allowed in src/app/infrastructure. Use the port.' }]
+              ? [
+                  {
+                    group: restrictedThirdParty,
+                    message:
+                      'Third-party libraries are only allowed in src/app/infrastructure. Use the port.',
+                  },
+                ]
               : []),
           ],
         },
@@ -49,7 +64,12 @@ module.exports = tseslint.config(
   },
   {
     files: ['src/app/infrastructure/**/*.ts'],
-    rules: { 'no-restricted-imports': ['error', { patterns: [{ group: ['@features/*/*'], message: 'Use the feature public API.' }] }] },
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [{ group: ['@features/*/*'], message: 'Use the feature public API.' }] },
+      ],
+    },
   },
   {
     files: ['**/*.spec.ts', '**/testing/**/*.ts'],
