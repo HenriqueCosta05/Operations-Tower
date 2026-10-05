@@ -13,3 +13,6 @@ build/
 .env.*
 !.env.example
 *.log
+
+# authentik local stack
+infra/authentik/data/

@@ -4,7 +4,8 @@ const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const prettier = require('eslint-config-prettier');
 
-const restrictedThirdParty = [];
+const restrictedThirdParty = ['oidc-client-ts/*'];
+const restrictedThirdPartyPackages = ['oidc-client-ts'];
 
 module.exports = tseslint.config(
   { ignores: ['dist/**', 'coverage/**', '.angular/**'] },
@@ -43,6 +44,11 @@ module.exports = tseslint.config(
       'no-restricted-imports': [
         'error',
         {
+          paths: restrictedThirdPartyPackages.map((name) => ({
+            name,
+            message:
+              'Third-party libraries are only allowed in src/app/infrastructure. Use the port.',
+          })),
           patterns: [
             {
               group: ['@features/*/*'],
