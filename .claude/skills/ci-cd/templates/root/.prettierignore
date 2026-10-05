@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.angular
+client/package-lock.json
+package-lock.json
+server/target
+server/build
+server/**/*.java
+.claude/skills/*/templates

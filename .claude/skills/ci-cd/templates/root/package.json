@@ -1,0 +1,17 @@
+{
+  "name": "operations-tower-tooling",
+  "private": true,
+  "description": "Monorepo tooling only: git hooks, formatting, commit linting. App code lives in client/ and server/.",
+  "scripts": {
+    "prepare": "husky",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.3.0"
+  }
+}
