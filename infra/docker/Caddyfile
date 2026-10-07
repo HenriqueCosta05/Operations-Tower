@@ -1,0 +1,17 @@
+{
+	email {$ACME_EMAIL}
+	{$CADDY_GLOBAL_OPTIONS}
+}
+
+{$PUBLIC_SCHEME}://{$APP_HOST} {
+	encode zstd gzip
+	reverse_proxy client:8080
+}
+
+{$PUBLIC_SCHEME}://{$API_HOST} {
+	reverse_proxy server:8080
+}
+
+{$PUBLIC_SCHEME}://{$AUTH_HOST} {
+	reverse_proxy authentik-server:9000
+}

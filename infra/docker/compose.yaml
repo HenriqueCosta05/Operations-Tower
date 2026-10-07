@@ -1,0 +1,126 @@
+name: operations-tower-${DEPLOY_ENV:?DEPLOY_ENV is set by ops.sh}
+
+x-service: &service
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-authentik-env: &authentik-env
+  AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY:?set AUTHENTIK_SECRET_KEY}
+  AUTHENTIK_POSTGRESQL__HOST: postgresql
+  AUTHENTIK_POSTGRESQL__NAME: authentik
+  AUTHENTIK_POSTGRESQL__USER: authentik
+  AUTHENTIK_POSTGRESQL__PASSWORD: ${PG_PASS:?set PG_PASS}
+  AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL:-admin@example.com}
+  AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD:?set AUTHENTIK_BOOTSTRAP_PASSWORD}
+  AUTHENTIK_BOOTSTRAP_TOKEN: ${AUTHENTIK_API_TOKEN:?set AUTHENTIK_API_TOKEN}
+  APP_URL: ${PUBLIC_SCHEME}://${APP_HOST}
+
+x-authentik-blueprints: &authentik-blueprints
+  - source: operations-tower-blueprint
+    target: /blueprints/custom/operations-tower.yaml
+
+configs:
+  caddyfile:
+    file: ./Caddyfile
+  operations-tower-blueprint:
+    file: ../authentik/blueprints/operations-tower.yaml
+
+services:
+  caddy:
+    <<: *service
+    image: docker.io/library/caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      PUBLIC_SCHEME: ${PUBLIC_SCHEME:?set PUBLIC_SCHEME (http or https)}
+      APP_HOST: ${APP_HOST:?set APP_HOST}
+      API_HOST: ${API_HOST:?set API_HOST}
+      AUTH_HOST: ${AUTH_HOST:?set AUTH_HOST}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+      CADDY_GLOBAL_OPTIONS: ${CADDY_GLOBAL_OPTIONS:-}
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      default:
+        aliases:
+          - ${APP_HOST}
+          - ${API_HOST}
+          - ${AUTH_HOST}
+    depends_on:
+      - client
+      - server
+      - authentik-server
+
+  client:
+    <<: *service
+    image: ${IMAGE_REGISTRY:-operations-tower}/client:${IMAGE_TAG:-latest}
+    environment:
+      API_ORIGIN: ${PUBLIC_SCHEME}://${API_HOST}
+      OIDC_AUTHORITY: ${PUBLIC_SCHEME}://${AUTH_HOST}/application/o/operations-tower/
+      OIDC_CLIENT_ID: operations-tower
+
+  server:
+    <<: *service
+    image: ${IMAGE_REGISTRY:-operations-tower}/server:${IMAGE_TAG:-latest}
+    environment:
+      AUTHENTIK_ISSUER_URI: ${PUBLIC_SCHEME}://${AUTH_HOST}/application/o/operations-tower/
+      AUTHENTIK_CLIENT_ID: operations-tower
+      APP_ALLOWED_ORIGINS: ${PUBLIC_SCHEME}://${APP_HOST}
+      AUTHENTIK_API_URL: http://authentik-server:9000
+      AUTHENTIK_API_TOKEN: ${AUTHENTIK_API_TOKEN:?set AUTHENTIK_API_TOKEN}
+
+  postgresql:
+    <<: *service
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: authentik
+      POSTGRES_USER: authentik
+      POSTGRES_PASSWORD: ${PG_PASS:?set PG_PASS}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d authentik -U authentik"]
+      interval: 15s
+      retries: 5
+      start_period: 20s
+      timeout: 5s
+    volumes:
+      - database:/var/lib/postgresql/data
+
+  authentik-server:
+    <<: *service
+    image: ghcr.io/goauthentik/server:${AUTHENTIK_TAG:-2026.8.3}
+    command: server
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment: *authentik-env
+    configs: *authentik-blueprints
+    volumes:
+      - authentik_data:/data
+
+  authentik-worker:
+    <<: *service
+    image: ghcr.io/goauthentik/server:${AUTHENTIK_TAG:-2026.8.3}
+    command: worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment: *authentik-env
+    configs: *authentik-blueprints
+    volumes:
+      - authentik_data:/data
+
+volumes:
+  caddy_data:
+  caddy_config:
+  database:
+  authentik_data:

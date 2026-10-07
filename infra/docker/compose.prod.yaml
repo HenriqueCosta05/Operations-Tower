@@ -1,0 +1,27 @@
+services:
+  caddy:
+    deploy:
+      resources:
+        limits: { memory: 256M }
+  client:
+    pull_policy: always
+    deploy:
+      resources:
+        limits: { memory: 256M }
+  server:
+    pull_policy: always
+    deploy:
+      resources:
+        limits: { memory: 1G }
+  postgresql:
+    deploy:
+      resources:
+        limits: { memory: 768M }
+  authentik-server:
+    deploy:
+      resources:
+        limits: { memory: 1536M }
+  authentik-worker:
+    deploy:
+      resources:
+        limits: { memory: 1G }

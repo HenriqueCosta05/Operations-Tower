@@ -12,7 +12,10 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "paths": { "@features/auth": ["./src/app/features/auth/index.ts"] },
+    "paths": {
+      "@features/auth": ["./src/app/features/auth/index.ts"],
+      "@features/users": ["./src/app/features/users/index.ts"]
+    },
     "module": "preserve"
   },
   "angularCompilerOptions": {

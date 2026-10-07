@@ -39,6 +39,8 @@ class SecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**")
                     .permitAll()
+                    .requestMatchers("/api/users/**")
+                    .hasRole("ADMINS")
                     .anyRequest()
                     .authenticated())
         .oauth2ResourceServer(

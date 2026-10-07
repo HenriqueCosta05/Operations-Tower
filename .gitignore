@@ -16,3 +16,6 @@ build/
 
 # authentik local stack
 infra/authentik/data/
+
+# docker stack secrets
+infra/docker/env/*.env

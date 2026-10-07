@@ -6,6 +6,10 @@ entries:
     id: operators-group
     identifiers:
       name: operators
+  - model: authentik_core.group
+    id: admins-group
+    identifiers:
+      name: admins
   - model: authentik_providers_oauth2.oauth2provider
     id: provider
     identifiers:
@@ -24,7 +28,7 @@ entries:
         !Find [authentik_crypto.certificatekeypair, [name, authentik Self-signed Certificate]]
       redirect_uris:
         - matching_mode: strict
-          url: http://localhost:4200/auth/callback
+          url: !Format ["%s/auth/callback", !Env [APP_URL, "http://localhost:4200"]]
       property_mappings:
         - !Find [
             authentik_providers_oauth2.scopemapping,
